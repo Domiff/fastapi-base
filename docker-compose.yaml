@@ -1,0 +1,114 @@
+services:
+  backend:
+    container_name: backend-${APP_NAME}
+    build:
+      dockerfile: Dockerfile
+    environment:
+      IS_DEBUG: "false"
+      POSTGRES_HOST: pg
+      REDIS_HOST: redis
+      RABBITMQ_HOST: rabbitmq
+      MAIL_SERVER: mailpit
+    env_file:
+      .env
+    command: ./run.sh
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    depends_on:
+      pg:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./templates:/app/templates
+
+  taskiq:
+    container_name: taskiq-${APP_NAME}
+    build:
+      dockerfile: Dockerfile
+    environment:
+      IS_DEBUG: "false"
+      POSTGRES_HOST: pg
+      REDIS_HOST: redis
+      RABBITMQ_HOST: rabbitmq
+      MAIL_SERVER: mailpit
+    env_file:
+      .env
+    command: ./taskiq.sh
+    depends_on:
+      pg:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./templates:/app/templates
+    restart: unless-stopped
+
+  pg:
+    container_name: pg-${APP_NAME}
+    image: postgres:16
+    env_file:
+      - .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      start_period: 5s
+      interval: 1m
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    container_name: redis-${APP_NAME}
+    image: redis:8-alpine
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      start_period: 5s
+      interval: 1m
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  rabbitmq:
+    container_name: rabbitmq-${APP_NAME}
+    image: rabbitmq:4-management
+    env_file:
+      - .env
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      start_period: 20s
+      interval: 1m
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  mailpit:
+    container_name: mailpit-${APP_NAME}
+    image: axllent/mailpit
+    env_file:
+      - .env
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    healthcheck:
+      test: [ "CMD", "/mailpit", "readyz" ]
+      start_period: 5s
+      interval: 1m
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  rabbitmq_data:

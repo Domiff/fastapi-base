@@ -1,0 +1,29 @@
+[project]
+name = "fastapi-base"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+    "aiosqlite>=0.22.1",
+    "alembic>=1.19.1",
+    "asyncpg>=0.31.0",
+    "fastapi-cache2[redis]>=0.2.2",
+    "fastapi-mail>=1.6.5",
+    "fastapi-storages[image,s3,sqlalchemy]>=0.5.0",
+    "fastapi-users[sqlalchemy]",
+    "fastapi[standard]>=0.141.1",
+    "pwdlib[argon2]>=0.3.0",
+    "pydantic-settings>=2.15.0",
+    "redis>=4.6.0",
+    "sqlalchemy>=2.0.52",
+    "taskiq>=0.12.5",
+    "taskiq-aio-pika>=0.6.0",
+    "taskiq-fastapi>=0.5.0",
+]
+
+[tool.fastapi]
+entrypoint = "backend.main:app"
+
+[dependency-groups]
+dev = [
+    "black>=26.5.1",
+]

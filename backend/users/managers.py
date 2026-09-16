@@ -34,7 +34,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
 
     async def on_after_verify(self, user: User, request: Request | None = None) -> None:
         await send_register_task.kiq(user.email)
-        logger.info("Welcome email queued", extraнатсройик={"email": user.email})
+        logger.info("Welcome email queued", extra={"email": user.email})
 
     async def on_after_forgot_password(
         self, user: User, token: str, request: Request | None = None

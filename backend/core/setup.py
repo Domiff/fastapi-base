@@ -44,10 +44,10 @@ def create_app() -> FastAPI:
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.cors.ALLOW_ORIGINS,
-        allow_credentials=settings.cors.ALLOW_CREDENTIALS,
-        allow_methods=settings.cors.ALLOW_METHODS,
-        allow_headers=settings.cors.ALLOW_HEADERS,
+        allow_origins=settings.cors.CORS_ORIGINS,
+        allow_credentials=settings.cors.CORS_ALLOW_CREDENTIALS,
+        allow_methods=settings.cors.CORS_ALLOW_METHODS,
+        allow_headers=settings.cors.CORS_ALLOW_HEADERS,
     )
 
     app.include_router(health_router)

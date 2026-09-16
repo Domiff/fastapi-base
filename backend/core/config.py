@@ -47,7 +47,7 @@ class DBSettings(AppSettings):
 
 class CORSSettings(AppSettings):
     CORS_ORIGINS: list[str] = ["127.0.0.1", "localhost"]
-    ALLOW_CREDENTIALS: bool = True
+    CORS_ALLOW_CREDENTIALS: bool = True
     CORS_ALLOW_METHODS: list[str] = ["*"]
     CORS_ALLOW_HEADERS: list[str] = ["*"]
 

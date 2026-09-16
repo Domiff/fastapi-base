@@ -1,0 +1,19 @@
+{% extends "sqladmin_original/base.html" %}
+
+{% block head_css %}
+<script>
+  (function () {
+    var mode = null;
+    try { mode = localStorage.getItem("ta-theme"); } catch (e) {}
+    if (mode !== "light" && mode !== "dark") {
+      mode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    document.documentElement.setAttribute("data-bs-theme", mode);
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('admin:statics', path='css/admin.css') }}">
+{% endblock %}

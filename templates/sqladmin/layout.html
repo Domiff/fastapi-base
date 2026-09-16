@@ -1,0 +1,147 @@
+{% extends "sqladmin/base.html" %}
+{% from "sqladmin/_menu.html" import sidebar_menu %}
+
+{% block body %}
+<div class="ta-backdrop" data-ta-sidebar-close></div>
+
+<aside class="ta-sidebar" id="ta-sidebar">
+  <a class="ta-brand" href="{{ url_for('admin:index') }}">
+    {% if admin.logo_url or admin.favicon_url %}
+    <img src="{{ admin.logo_url or admin.favicon_url }}" alt="">
+    {% else %}
+    <span class="ta-brand-mark">{{ admin.title[:1] }}</span>
+    {% endif %}
+    <span class="ta-brand-title">
+      {{ admin.title }}
+      <span class="ta-brand-subtitle">Панель управления</span>
+    </span>
+  </a>
+
+  <nav class="ta-nav">
+    {{ sidebar_menu(admin._menu, request) }}
+  </nav>
+
+  <div class="ta-sidebar-footer">
+    <div class="ta-theme-switch" role="group" aria-label="Тема">
+      <button type="button" data-ta-theme-set="light" title="Светлая"><i class="fa-solid fa-sun"></i></button>
+      <button type="button" data-ta-theme-set="dark" title="Тёмная"><i class="fa-solid fa-moon"></i></button>
+    </div>
+    {% if admin.authentication_backend %}
+    {% set username = request.session.get("admin_email", "admin") %}
+    <div class="ta-user">
+      <span class="ta-avatar">{{ username[:1] }}</span>
+      <span class="ta-user-name">{{ username }}</span>
+      <a href="{{ request.url_for('admin:logout') }}" class="ta-icon-btn" title="{{ _('Logout') }}">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</aside>
+
+<div class="ta-main">
+  {% block topbar %}
+  <header class="ta-topbar">
+    <button type="button" class="ta-icon-btn ta-sidebar-toggle" data-ta-sidebar-open aria-controls="ta-sidebar"
+      aria-label="Меню">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <ol class="ta-breadcrumbs">
+      <li><a href="{{ url_for('admin:index') }}"><i class="fa-solid fa-house"></i></a></li>
+      {% if model_view is defined %}
+      {% set path = request.url.path %}
+      {% set on_list = not (path.endswith("/create") or "/edit/" in path or "/details/" in path) %}
+      <li>
+        {% if on_list %}{{ model_view.name_plural }}{% else %}
+        <a href="{{ url_for('admin:list', identity=model_view.identity) }}">{{ model_view.name_plural }}</a>
+        {% endif %}
+      </li>
+      {% if path.endswith("/create") %}
+      <li>{{ _("New %(name)s", name=model_view.name) }}</li>
+      {% elif "/edit/" in path %}
+      <li>{{ _("Edit") }} #{{ request.path_params.get("pk") }}</li>
+      {% elif "/details/" in path %}
+      <li>#{{ request.path_params.get("pk") }}</li>
+      {% endif %}
+      {% endif %}
+    </ol>
+
+    {% set show_switcher = i18n_config.language_switcher and i18n_config.language_switcher | length > 1 %}
+    {% if show_switcher %}
+    <div class="dropdown ms-auto">
+      <button type="button" class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"
+        title="{{ _('Language') }}">
+        <i class="fa-solid fa-language"></i>
+        <span class="d-none d-sm-inline">{{ get_locale_display_name(get_locale()) }}</span>
+      </button>
+      <div class="dropdown-menu dropdown-menu-end">
+        {% for code in i18n_config.language_switcher %}
+        <a class="dropdown-item {% if code == get_locale() %}active{% endif %}"
+          href="{{ request.url.include_query_params(lang=code) }}">
+          {{ get_locale_display_name(code) }}
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </header>
+  {% endblock %}
+
+  <main class="ta-content">
+    {% block content_header %}
+    {% if title is defined and title and model_view is not defined %}
+    <div class="ta-page-header">
+      <h1 class="ta-page-title">{{ title }}</h1>
+      {% if subtitle %}<div class="ta-page-subtitle">{{ subtitle }}</div>{% endif %}
+    </div>
+    {% endif %}
+    {% endblock %}
+
+    <div class="row row-deck row-cards">
+      {% block content %}{% endblock %}
+      {% block flash %}
+      {% include 'sqladmin/flash.html' %}
+      {% endblock %}
+      {% block secret_modal %}
+      {% include 'sqladmin/secret_modal.html' %}
+      {% endblock %}
+    </div>
+  </main>
+</div>
+{% endblock %}
+
+{% block tail %}
+{{ super() }}
+<script>
+  (function () {
+    var root = document.documentElement;
+
+    function apply(mode) {
+      root.setAttribute("data-bs-theme", mode);
+      document.querySelectorAll("[data-ta-theme-set]").forEach(function (btn) {
+        btn.classList.toggle("active", btn.getAttribute("data-ta-theme-set") === mode);
+      });
+    }
+
+    document.querySelectorAll("[data-ta-theme-set]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var mode = btn.getAttribute("data-ta-theme-set");
+        try { localStorage.setItem("ta-theme", mode); } catch (e) {}
+        apply(mode);
+      });
+    });
+    apply(root.getAttribute("data-bs-theme"));
+
+    function toggleSidebar(open) {
+      document.body.classList.toggle("ta-sidebar-open", open);
+    }
+    document.querySelectorAll("[data-ta-sidebar-open]").forEach(function (el) {
+      el.addEventListener("click", function () { toggleSidebar(true); });
+    });
+    document.querySelectorAll("[data-ta-sidebar-close]").forEach(function (el) {
+      el.addEventListener("click", function () { toggleSidebar(false); });
+    });
+  })();
+</script>
+{% endblock %}

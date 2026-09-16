@@ -93,6 +93,11 @@ class UsersSettings(AppSettings):
     RESET_PASSWORD_URL: str = "{base_url}/reset-password?token={token}"
 
 
+class AdminSettings(AppSettings):
+    ADMIN_SECRET_KEY: str
+    ADMIN_BASE_URL: str = "/admin"
+
+
 class MailSettings(AppSettings):
     MAIL_USERNAME: str = ""
     MAIL_PASSWORD: str = ""
@@ -136,6 +141,7 @@ class Settings(AppSettings):
     storage: StorageSettings = StorageSettings()
     redis: RedisSettings = RedisSettings()
     users: UsersSettings = UsersSettings()
+    admin: AdminSettings = AdminSettings()
     mail: MailSettings = MailSettings()
     rabbit: RabbitMQSettings = RabbitMQSettings()
     taskiq: TaskiqSettings = TaskiqSettings()

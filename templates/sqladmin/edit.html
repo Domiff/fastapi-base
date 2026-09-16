@@ -1,0 +1,13 @@
+{% extends "sqladmin_original/edit.html" %}
+
+{% block submit_buttons_bottom %}
+  <button type="submit" name="save" value="Save" class="btn">{{ _('Save') }}</button>
+  <button type="submit" name="save" value="Save and continue editing" class="btn">{{ _('Save and continue editing') }}</button>
+  {% if model_view.check_can_create(request) %}
+    {% if model_view.save_as %}
+    <button type="submit" name="save" value="Save as new" class="btn">{{ _('Save as new') }}</button>
+    {% else %}
+    <button type="submit" name="save" value="Save and add another" class="btn">{{ _('Save and add another') }}</button>
+    {% endif %}
+  {% endif %}
+{% endblock %}

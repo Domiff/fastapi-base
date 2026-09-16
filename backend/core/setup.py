@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from backend.admin.setup import setup_admin
 from backend.core.broker import broker
 from backend.core.cache import setup_cache
 from backend.core.config import settings
@@ -53,5 +54,7 @@ def create_app() -> FastAPI:
     app.include_router(health_router)
     app.include_router(auth_router)
     app.include_router(users_router)
+
+    setup_admin(app)
 
     return app

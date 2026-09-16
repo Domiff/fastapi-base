@@ -1,0 +1,43 @@
+{% extends "sqladmin/layout.html" %}
+
+{% macro dash_card(item, request) %}
+<a class="ta-dash-card" href="{{ item.url(request) }}">
+  <span class="ta-dash-icon"><i class="{{ item.icon or 'fa-solid fa-table' }}"></i></span>
+  <span class="ta-dash-title">{{ item.display_name }}</span>
+  <i class="fa-solid fa-chevron-right ta-dash-arrow"></i>
+</a>
+{% endmacro %}
+
+{% block content_header %}
+<div class="ta-page-header">
+  {% set username = request.session.get("admin_email") if admin.authentication_backend else None %}
+  <h1 class="ta-page-title">Добро пожаловать{% if username %}, {{ username }}{% endif %}</h1>
+  <div class="ta-page-subtitle">{{ admin.title }} — выберите раздел для работы</div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="col-12 d-block">
+  {% set loose = admin._menu.items | selectattr("type_", "equalto", "View") | list %}
+  {% if loose %}
+  <section class="ta-dash-section">
+    <div class="ta-dash-grid">
+      {% for item in loose if item.is_visible(request) and item.is_accessible(request) %}
+      {{ dash_card(item, request) }}
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% for category in admin._menu.items if category.type_ == "Category" and category.is_visible(request) and category.is_accessible(request) %}
+  <section class="ta-dash-section">
+    <h2 class="ta-dash-heading">{{ category.display_name }}</h2>
+    <div class="ta-dash-grid">
+      {% for item in category.children if item.is_visible(request) and item.is_accessible(request) %}
+      {{ dash_card(item, request) }}
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+</div>
+{% endblock %}

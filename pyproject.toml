@@ -14,6 +14,7 @@ dependencies = [
     "pwdlib[argon2]>=0.3.0",
     "pydantic-settings>=2.15.0",
     "redis>=4.6.0",
+    "sqladmin[full]>=0.31.1",
     "sqlalchemy>=2.0.52",
     "taskiq>=0.12.5",
     "taskiq-aio-pika>=0.6.0",

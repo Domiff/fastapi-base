@@ -1,0 +1,34 @@
+{% macro nav_link(item, request) %}
+<li>
+  <a class="ta-nav-link {% if item.is_active(request) %}active{% endif %}" href="{{ item.url(request) }}">
+    <i class="{{ item.icon or 'fa-solid fa-table' }}"></i>
+    <span>{{ item.display_name }}</span>
+  </a>
+</li>
+{% endmacro %}
+
+{% macro sidebar_menu(menu, request) %}
+{% set ns = namespace(loose=[]) %}
+{% for item in menu.items if item.type_ == "View" and item.is_visible(request) and item.is_accessible(request) %}
+  {% set ns.loose = ns.loose + [item] %}
+{% endfor %}
+
+{% if ns.loose %}
+<div class="ta-nav-section">
+  <ul class="ta-nav-list">
+    {% for item in ns.loose %}{{ nav_link(item, request) }}{% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+{% for category in menu.items if category.type_ == "Category" and category.is_visible(request) and category.is_accessible(request) %}
+<div class="ta-nav-section">
+  <div class="ta-nav-heading">{{ category.display_name }}</div>
+  <ul class="ta-nav-list">
+    {% for item in category.children if item.is_visible(request) and item.is_accessible(request) %}
+    {{ nav_link(item, request) }}
+    {% endfor %}
+  </ul>
+</div>
+{% endfor %}
+{% endmacro %}
